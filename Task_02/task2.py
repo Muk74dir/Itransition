@@ -2,45 +2,32 @@ import os
 import hashlib
 import zipfile
 
-file_path = r"C:\Users\User\OneDrive\Desktop\Itransition\task2.zip"
-dir_path = r"C:\Users\User\OneDrive\Desktop\Itransition"
+file_path = r"C:\Itransition\Task_02\task2.zip"
+dir_path = r"C:\Itransition\Task_02\temp"
+result = ""
 
-# Function to calculate SHA3-256 hash of a file
 def calculate_hash(file_path):
-    with open(file_path, 'rb') as f:
-        data = f.read()
-        print(data)
-        return hashlib.sha3_256(data).hexdigest()
+    hash_function = hashlib.sha3_256()
+    with open(file_path, 'rb') as file:
+        while True:
+            chunk = file.read(4096)
+            if not chunk:
+                break
+            hash_function.update(chunk)
+    return hash_function.hexdigest().lower()
 
-# Function to read all files from a directory recursively
-def read_files_from_dir(dir_path):
-    file_list = []
-    for root, dirs, files in os.walk(dir_path):
-        for file in files:
-            file_list.append(os.path.join(root, file))
-    return file_list
+with zipfile.ZipFile(file_path, 'r') as zip_ref:
+    zip_ref.extractall(dir_path)
 
-# Extract files from the ZIP archive
-with zipfile.ZipFile('task2.zip', 'r') as zip_ref:
-    zip_ref.extractall('temp')
+hashes = []
+for root, dirs, files in os.walk(dir_path):
+    for file in files:
+        file_path = os.path.join(root, file)
+        hash_value = calculate_hash(file_path)
+        hashes.append(hash_value)
 
-# Read all files from the extracted directory
-files = read_files_from_dir('temp')
-
-# Calculate SHA3-256 hashes for each file
-hashes = [calculate_hash(file) for file in files]
-print(hashes)
-
-# Sort the hashes in ascending order
 sorted_hashes = sorted(hashes)
-
-# Join sorted hashes without any separator
-joined_hashes = ''.join(sorted_hashes)
-
-# Concatenate the sorted hashes with your email in lowercase
-result_string = joined_hashes + 'your.email@example.com'
-
-# Calculate the SHA3-256 hash of the result string
-final_hash = hashlib.sha3_256(result_string.encode()).hexdigest()
-
+result = ''.join(sorted_hashes)
+result += "muk74dir@gmail.com"
+final_hash = hashlib.sha3_256(result.encode()).hexdigest().lower()
 print(final_hash)
